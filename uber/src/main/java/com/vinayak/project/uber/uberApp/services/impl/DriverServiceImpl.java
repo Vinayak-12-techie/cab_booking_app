@@ -114,7 +114,7 @@ public class DriverServiceImpl implements DriverService {
     @Override
     public Page<RideDto> getAllMyRides(PageRequest pageRequest) {
         Driver currentDriver=getCurrentDriver();
-        return rideService.getAllRidesOfDriver(currentDriver.getId(),pageRequest).map(
+        return rideService.getAllRidesOfDriver(currentDriver,pageRequest).map(
                 ride->modelMapper.map(ride,RideDto.class)
         );
     }
@@ -128,6 +128,6 @@ public class DriverServiceImpl implements DriverService {
     @Override
     public Driver updateDriverAvailability(Driver driver, Boolean availability) {
         driver.setAvailable(availability);
-        driverRepo.save(driver);
+        return driverRepo.save(driver);
     }
 }

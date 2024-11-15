@@ -4,6 +4,7 @@ import com.vinayak.project.uber.uberApp.dto.RideRequestDto;
 import com.vinayak.project.uber.uberApp.entities.Driver;
 import com.vinayak.project.uber.uberApp.entities.Ride;
 import com.vinayak.project.uber.uberApp.entities.RideRequest;
+import com.vinayak.project.uber.uberApp.entities.Rider;
 import com.vinayak.project.uber.uberApp.entities.enums.RideRequestStatus;
 import com.vinayak.project.uber.uberApp.entities.enums.RideStatus;
 import com.vinayak.project.uber.uberApp.exceptions.ResourceNotFoundException;
@@ -55,13 +56,14 @@ public class RideServiceImpl implements RideService {
     }
 
     @Override
-    public Page<Ride> getAllRidesOfRider(Long riderId, PageRequest pageRequest) {
-        return null;
+    public Page<Ride> getAllRidesOfRider(Rider rider, PageRequest pageRequest) {
+        return rideRepo.findByRider(rider,pageRequest);
     }
 
+
     @Override
-    public Page<Ride> getAllRidesOfDriver(Long driverId, PageRequest pageRequest) {
-        return null;
+    public Page<Ride> getAllRidesOfDriver(Driver driver, PageRequest pageRequest) {
+        return rideRepo.findByDriver(driver,pageRequest);
     }
 
     private String generateOtp(){

@@ -14,6 +14,9 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @Setter
+@Table(indexes = {
+        @Index(name = "idx_riderequest_rider",columnList = "rider_id")
+})
 public class RideRequest {
 
     @Id

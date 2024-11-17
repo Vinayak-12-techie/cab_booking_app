@@ -3,12 +3,15 @@ package com.vinayak.project.uber.uberApp.services.impl;
 import com.vinayak.project.uber.uberApp.dto.DriverDto;
 import com.vinayak.project.uber.uberApp.dto.SignupDto;
 import com.vinayak.project.uber.uberApp.dto.UserDto;
+import com.vinayak.project.uber.uberApp.entities.Driver;
 import com.vinayak.project.uber.uberApp.entities.Rider;
 import com.vinayak.project.uber.uberApp.entities.User;
 import com.vinayak.project.uber.uberApp.entities.enums.Role;
+import com.vinayak.project.uber.uberApp.exceptions.ResourceNotFoundException;
 import com.vinayak.project.uber.uberApp.exceptions.RuntimeConflictException;
 import com.vinayak.project.uber.uberApp.repositories.UserRepo;
 import com.vinayak.project.uber.uberApp.services.AuthService;
+import com.vinayak.project.uber.uberApp.services.DriverService;
 import com.vinayak.project.uber.uberApp.services.RiderService;
 import com.vinayak.project.uber.uberApp.services.WalletService;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +22,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Set;
 
+import static com.vinayak.project.uber.uberApp.entities.enums.Role.DRIVER;
+
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
@@ -26,6 +31,7 @@ public class AuthServiceImpl implements AuthService {
     private final UserRepo userRepo;
     private final RiderService riderService;
     private final WalletService walletService;
+    private final DriverService driverService;
 
     @Override
     public String login(String email, String password) {
@@ -54,7 +60,25 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public DriverDto onboardNewDriver(Long userId) {
-        return null;
+    public DriverDto onboardNewDriver(Long userId, String vehicleId ) {
+       User user= userRepo.findById(userId)
+               .orElseThrow(()-> new ResourceNotFoundException("user not found with id "+ userId));
+
+       if(user.getRoles().contains(DRIVER))
+           throw new RuntimeConflictException("User with userid "+userId+ "is already a driver");
+
+       Driver createDriver= Driver.builder()
+               .user(user)
+               .rating(0.0)
+               .vehicleId(vehicleId)
+               .available(true)
+               .build();
+
+       user.getRoles().add(DRIVER);
+       userRepo.save(user);
+
+       Driver savedDriver=driverService.createNewDriver(createDriver);
+
+        return modelMapper.map(savedDriver, DriverDto.class);
     }
 }

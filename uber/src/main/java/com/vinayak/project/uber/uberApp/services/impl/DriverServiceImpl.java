@@ -10,10 +10,7 @@ import com.vinayak.project.uber.uberApp.entities.enums.RideRequestStatus;
 import com.vinayak.project.uber.uberApp.entities.enums.RideStatus;
 import com.vinayak.project.uber.uberApp.exceptions.ResourceNotFoundException;
 import com.vinayak.project.uber.uberApp.repositories.DriverRepo;
-import com.vinayak.project.uber.uberApp.services.DriverService;
-import com.vinayak.project.uber.uberApp.services.PaymentService;
-import com.vinayak.project.uber.uberApp.services.RideRequestService;
-import com.vinayak.project.uber.uberApp.services.RideService;
+import com.vinayak.project.uber.uberApp.services.*;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -34,6 +31,7 @@ public class DriverServiceImpl implements DriverService {
     private final RideService rideService;
     private final ModelMapper modelMapper;
     private final PaymentService paymentService;
+    private final RatingService ratingService;
 
     @Override
     @Transactional
@@ -96,6 +94,7 @@ public class DriverServiceImpl implements DriverService {
         Ride savedRide= rideService.updateRideStatus(ride,RideStatus.ONGOING);
 
         paymentService.createNewPayment(savedRide);
+        ratingService.createNewRating(savedRide);
 
         return modelMapper.map(savedRide,RideDto.class);
     }
@@ -124,7 +123,17 @@ public class DriverServiceImpl implements DriverService {
 
     @Override
     public RiderDto rateRider(Long rideId, Integer rating) {
-        return null;
+        Ride ride= rideService.getRideById(rideId);
+        Driver driver= getCurrentDriver();
+        if(!driver.equals(ride.getDriver())){
+            throw new RuntimeException("You cannot rate the Rider");
+        }
+
+        if(!ride.getRideStatus().equals(RideStatus.ENDED)){
+            throw new RuntimeException("You cannot rate the rider until the ride is ended");
+        }
+
+        return ratingService.rateRider(ride, rating);
     }
 
     @Override

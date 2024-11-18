@@ -12,6 +12,7 @@ import com.vinayak.project.uber.uberApp.repositories.DriverRepo;
 import com.vinayak.project.uber.uberApp.repositories.RideRequestRepo;
 import com.vinayak.project.uber.uberApp.repositories.RiderRepo;
 import com.vinayak.project.uber.uberApp.services.DriverService;
+import com.vinayak.project.uber.uberApp.services.RatingService;
 import com.vinayak.project.uber.uberApp.services.RideService;
 import com.vinayak.project.uber.uberApp.services.RiderService;
 import com.vinayak.project.uber.uberApp.strategies.RideStrategyManager;
@@ -36,6 +37,7 @@ public class RiderServiceImpl implements RiderService {
     private final RiderRepo riderRepo;
     private final RideService rideService;
     private final DriverService driverService;
+    private final RatingService ratingService;
 
     @Override
     @Transactional
@@ -81,8 +83,17 @@ public class RiderServiceImpl implements RiderService {
 
     @Override
     public DriverDto rateDriver(Long rideId, Integer rating) {
-        return null;
-    }
+        Ride ride= rideService.getRideById(rideId);
+        Rider rider=getCurrentRider();
+        if(!rider.equals(ride.getRider())){
+            throw new RuntimeException("You cannot rate the Driver");
+        }
+
+        if(!ride.getRideStatus().equals(RideStatus.ENDED)){
+            throw new RuntimeException("You cannot rate the Driver until the ride is ended");
+        }
+
+        return ratingService.rateDriver(ride, rating);    }
 
     @Override
     public RiderDto getMyProfile() {

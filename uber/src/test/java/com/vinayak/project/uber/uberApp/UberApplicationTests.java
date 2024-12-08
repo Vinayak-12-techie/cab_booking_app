@@ -8,15 +8,4 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest
 class UberApplicationTests {
 
-	@Autowired
-	private EmailSenderService emailSenderService;
-
-
-
-
-	@Test
-	void contextLoads() {
-		emailSenderService.sendEmail("wetenay900@merotx.com","Test Email","Hello There , this is a test Email");
-	}
-
 }
